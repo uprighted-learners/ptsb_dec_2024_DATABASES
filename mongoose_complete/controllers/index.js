@@ -1,6 +1,6 @@
 import userController from "./user_controller.js"
 
-// import posts controller
+// add post controller
+import postController from "./post_controller.js"
 
-
-export { userController }
+export { userController, postController }
