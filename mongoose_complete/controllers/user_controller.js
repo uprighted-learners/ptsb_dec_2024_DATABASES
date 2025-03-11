@@ -1,9 +1,9 @@
 import express from "express";
-
-const router = express.Router();
-
 import User from "../models/user.js";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken"
+
+const router = express.Router();
 
 router.post("/signup", async (req, res) => {
   try {
@@ -32,11 +32,14 @@ router.post("/signup", async (req, res) => {
     });
 
     // Assign a token
-
+    const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
+      expiresIn: 60*60*24
+    })
+    
     res.status(200).json({
       Msg: "Success! User was Created!",
       User: newUser,
-      // Token:
+      Token: token
     });
   } catch (err) {
     res.status(500).json({
@@ -61,9 +64,15 @@ router.post("/login", async (req, res) => {
 
     if(!verifiedPassword) throw new Error("Error logging in")
     
+    // Assign a token
+    const token = jwt.sign({ id: foundUser._id }, process.env.JWT_SECRET, {
+      expiresIn: 60*60*24
+    })
+
     res.status(200).json({
       Msg: "Success! You are logged in!",
-      User: foundUser
+      User: foundUser,
+      Token: token
     })
   } catch (err) {
     res.status(500).json({
