@@ -1,7 +1,7 @@
 import express from "express";
 import User from "../models/user.js";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken"
+import jwt from "jsonwebtoken";
 
 const router = express.Router();
 
@@ -33,13 +33,16 @@ router.post("/signup", async (req, res) => {
 
     // Assign a token
     const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
-      expiresIn: 60*60*24
-    })
-    
+      expiresIn: 60 * 60 * 24,
+      // "2 days"
+      // "1m"
+      // "10h"
+    });
+
     res.status(200).json({
       Msg: "Success! User was Created!",
       User: newUser,
-      Token: token
+      Token: token,
     });
   } catch (err) {
     res.status(500).json({
@@ -53,27 +56,28 @@ router.post("/signup", async (req, res) => {
 
 router.post("/login", async (req, res) => {
   try {
-    const { email, password } = req.body
+    const { email, password } = req.body;
 
-    const foundUser = await User.findOne({ email: email })
+    const foundUser = await User.findOne({ email: email });
 
     // Can provide custom error message if a user was not found, or something general to relay back to the client
-    if (!foundUser) throw new Error("Error logging in") 
+    if (!foundUser) throw new Error("Error logging in");
 
-    const verifiedPassword = await bcrypt.compare(password, foundUser.password)
+    const verifiedPassword = await bcrypt.compare(password, foundUser.password);
 
-    if(!verifiedPassword) throw new Error("Error logging in")
-    
+    if (!verifiedPassword) throw new Error("Error logging in");
+
     // Assign a token
     const token = jwt.sign({ id: foundUser._id }, process.env.JWT_SECRET, {
-      expiresIn: 60*60*24
-    })
+      expiresIn: "5 days",
+    });
 
     res.status(200).json({
       Msg: "Success! You are logged in!",
       User: foundUser,
-      Token: token
-    })
+      Token: token,
+    });
+    
   } catch (err) {
     res.status(500).json({
       Error: err.message,

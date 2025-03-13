@@ -9,6 +9,10 @@ import mongoose from "mongoose"
 
 import { userController, postController } from "./controllers/index.js"
 
+// Importing validate-session middleware function
+import validateSession from "./middleware/validate-session.js"
+
+
 const app = express()
 
 //? Connection URI variable from .env
@@ -24,7 +28,12 @@ const db = mongoose.connection
 
 app.use(express.json())
 
+
 app.use("/users", userController)
+
+// Use validation middleware
+app.use(validateSession)
+
 app.use("/posts", postController)
 
 db.once("open", () => {
