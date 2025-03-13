@@ -9,28 +9,35 @@ Access to (req, res, next)
 */
 
 import jwt from "jsonwebtoken"
+import User from "../models/user.js"
 
 const validateSession = async (req, res, next) => {
   try {
-    console.log("Endpoint was hit");
 
     // Take the token provided by the request object
     const auth = req.headers.authorization
 
+    // If no auth, throw error
     if (!auth) throw new Error("Authorization header not provided") 
     // ? OR
     // if (!auth) throw new Error("Unauthorized") 
 
+    // Get the second word from the string  "Bearer TOKEN_HERE"
     const token = auth.split(" ")[1]
 
     if(!token) throw new Error("Invalid Token")
 
+    // Allow the jwt library to decrypt our token, using our secret key
     const decoded = jwt.verify(token, process.env.JWT_SECRET )
-    console.log("Decoded: ",decoded);
+    
+    // Querying our User tables to find the user with the matching id
+    const user = await User.findById(decoded.id)
 
-    console.log("Auth split?", );
+    if(!user) throw new Error("User not found!")
+    
+    req.user = user
 
-    return next();
+    next();
   } catch (err) {
     console.log(err.code);
     res.status(500).json({
